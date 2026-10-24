@@ -1,0 +1,20 @@
+{
+  "name": "savory-ai-bistro",
+  "version": "1.0.0",
+  "description": "Full-Stack AI-Powered Restaurant Web Application with Gemini AI and Dynamic Management",
+  "main": "server/server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "node --watch server/server.js",
+    "client": "npm run dev --prefix client",
+    "build": "npm run build --prefix client",
+    "start": "node server/server.js",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client"
+  },
+  "keywords": ["restaurant", "fullstack", "react", "express", "ai", "gemini"],
+  "author": "Antigravity",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
