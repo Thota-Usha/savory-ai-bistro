@@ -27,9 +27,16 @@ def create_reservation(
         special_requests=data.special_requests.strip() if data.special_requests else None,
         status="confirmed"
     )
-    db.add(reservation)
-    db.commit()
-    db.refresh(reservation)
+    try:
+        db.add(reservation)
+        db.commit()
+        db.refresh(reservation)
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to create reservation: {str(exc)}"
+        )
 
     resp = ReservationResponse(
         id=reservation.id,

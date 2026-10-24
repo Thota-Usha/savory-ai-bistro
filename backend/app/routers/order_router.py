@@ -108,24 +108,31 @@ def create_order(
         status="pending",
         tracking_timeline=json.dumps(initial_timeline)
     )
-    db.add(new_order)
-    db.commit()
-    db.refresh(new_order)
+    try:
+        db.add(new_order)
+        db.commit()
+        db.refresh(new_order)
 
-    # 4. Save line items
-    for item in data.items:
-        order_item = OrderItem(
-            order_id=new_order.id,
-            menu_item_id=item.menu_item_id,
-            item_name=item.item_name,
-            price=item.price,
-            quantity=item.quantity,
-            special_instructions=item.special_instructions or "",
-            image=item.image
+        # 4. Save line items
+        for item in data.items:
+            order_item = OrderItem(
+                order_id=new_order.id,
+                menu_item_id=item.menu_item_id,
+                item_name=item.item_name,
+                price=item.price,
+                quantity=item.quantity,
+                special_instructions=item.special_instructions or "",
+                image=item.image
+            )
+            db.add(order_item)
+        db.commit()
+        db.refresh(new_order)
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Order placement failed: {str(exc)}"
         )
-        db.add(order_item)
-    db.commit()
-    db.refresh(new_order)
 
     resp = format_order_response(new_order)
 

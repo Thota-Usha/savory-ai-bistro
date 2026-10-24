@@ -39,18 +39,25 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
             detail="An account with this email address already exists"
         )
     
-    user = User(
-        name=data.name.strip(),
-        email=data.email.lower().strip(),
-        hashed_password=hash_password(data.password),
-        role="customer",
-        phone=data.phone,
-        address=data.address,
-        dietary_preferences=json.dumps(data.dietary_preferences or [])
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    try:
+        user = User(
+            name=data.name.strip(),
+            email=data.email.lower().strip(),
+            hashed_password=hash_password(data.password),
+            role="customer",
+            phone=data.phone,
+            address=data.address,
+            dietary_preferences=json.dumps(data.dietary_preferences or [])
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Registration failed: {str(exc)}"
+        )
 
     token = create_access_token({"sub": user.id, "email": user.email, "role": user.role})
     return TokenResponse(

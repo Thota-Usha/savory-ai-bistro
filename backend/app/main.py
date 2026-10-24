@@ -19,11 +19,12 @@ from app.routers import (
 )
 
 # Initialize database schema
-Base.metadata.create_all(bind=engine)
-
-# Seed database with initial menu items and users
-with SessionLocal() as db_session:
-    seed_database(db_session)
+try:
+    Base.metadata.create_all(bind=engine)
+    with SessionLocal() as db_session:
+        seed_database(db_session)
+except Exception as e:
+    print(f"Database initialization note: {e}")
 
 # Initialize FastAPI App
 app = FastAPI(

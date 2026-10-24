@@ -58,9 +58,16 @@ def submit_review(
         integrity_score=integrity["integrity_score"],
         is_flagged=integrity["is_flagged"]
     )
-    db.add(review)
-    db.commit()
-    db.refresh(review)
+    try:
+        db.add(review)
+        db.commit()
+        db.refresh(review)
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to submit review: {str(exc)}"
+        )
 
     return ReviewResponse(
         id=review.id,

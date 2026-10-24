@@ -28,9 +28,16 @@ def submit_contact_inquiry(
         integrity_status=integrity["integrity_status"],
         status="unread"
     )
-    db.add(inquiry)
-    db.commit()
-    db.refresh(inquiry)
+    try:
+        db.add(inquiry)
+        db.commit()
+        db.refresh(inquiry)
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to submit message: {str(exc)}"
+        )
 
     return InquiryResponse(
         id=inquiry.id,
